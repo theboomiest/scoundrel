@@ -92,7 +92,7 @@ const weaponRuleLabel = computed(() => {
 })
 
 const statusLabel = computed(() => {
-  if (state.status === 'won') return 'Victory! You cleared the streets.'
+  if (state.status === 'won') return 'Victory! You cleared the dungeon!'
   if (state.status === 'lost') return 'Defeated. Your run ends here.'
   if (state.status === 'playing') return state.message || 'Choose a card to resolve.'
   return state.message
@@ -256,7 +256,7 @@ const fleeRoom = () => {
   state.roomInteracted = false
   state.previousRoomFled = true
   state.selectedCard = null
-  state.message = `${roomLabel.value}: You flee, the alley shifts.`
+  state.message = `${roomLabel.value}: You flee, the dungeon shifts.`
   state.turn += 1
 
   drawNewRoom(4)
@@ -296,7 +296,6 @@ const restoreFullHealth = () => {
       <div class="hud-block">
         <p class="label">Room</p>
         <p class="value">{{ roomLabel }}</p>
-        <p class="hint">One potion works per room.</p>
       </div>
       <div class="hud-actions">
         <Button

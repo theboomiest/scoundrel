@@ -10,8 +10,8 @@ import logo from './assets/logo.svg'
         <p class="eyebrow">Solo Card Crawler</p>
         <h1>Scoundrel</h1>
         <p class="lede">
-          Clear the alley by resolving each card. Monsters hurt, potions heal, weapons block damage
-          from monsters. Survive the deck to win the run.
+          Clear the dungeon rooms by resolving each card. Monsters hurt, potions heal, weapons block
+          damage from monsters. Survive the deck to win the run.
         </p>
       </div>
       <img alt="Scoundrel hero" class="hero__badge" :src="logo" width="96" height="96" />
