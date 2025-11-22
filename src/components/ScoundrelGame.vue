@@ -3,6 +3,7 @@ import { computed, reactive } from 'vue'
 import ScoundrelCard from './ScoundrelCard.vue'
 
 const maxHealth = 20
+const isDev = import.meta.env.DEV
 
 const ranks = [
   { label: '2', value: 2 },
@@ -404,9 +405,9 @@ const restoreFullHealth = () => {
       <p><strong>Hearts</strong> are potions; only the first potion each room heals.</p>
     </footer>
 
-    <div class="debug-panel">
+    <div v-if="isDev" class="debug-panel">
       <div class="debug-row">
-        <p><strong>Deck (top ➜ bottom)</strong></p>
+        <p><strong>Deck (top to bottom)</strong></p>
         <Button
           label="Restore full health (debug)"
           type="button"
