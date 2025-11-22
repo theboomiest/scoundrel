@@ -1,85 +1,75 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import ScoundrelGame from './components/ScoundrelGame.vue'
+import logo from './assets/logo.svg'
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <main class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Solo Card Crawler</p>
+        <h1>Scoundrel</h1>
+        <p class="lede">
+          Clear the alley by resolving each card. Monsters hurt, potions heal, treasure boosts your
+          haul. Survive the deck to win the run.
+        </p>
+      </div>
+      <img alt="Scoundrel hero" class="hero__badge" :src="logo" width="96" height="96" />
+    </header>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+    <ScoundrelGame />
+  </main>
 </template>
 
 <style scoped>
-header {
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(59, 7, 100, 0.6), rgba(8, 47, 73, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1.5rem;
+  border-radius: 22px;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.4);
+  color: #f8fafc;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: rgba(248, 250, 252, 0.8);
+  margin-bottom: 0.25rem;
+}
+
+h1 {
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  margin: 0 0 0.35rem;
+}
+
+.lede {
+  margin: 0;
+  max-width: 640px;
+  color: rgba(248, 250, 252, 0.85);
   line-height: 1.5;
-  max-height: 100vh;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.hero__badge {
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.35));
 }
 
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
+@media (max-width: 640px) {
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 }
 </style>

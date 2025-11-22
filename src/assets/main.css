@@ -1,35 +1,29 @@
 @import './base.css';
 
 #app {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+  padding: 2.5rem 1.25rem 3rem;
+  font-weight: 400;
+}
+
+body {
+  background: radial-gradient(circle at 20% 20%, rgba(252, 211, 77, 0.05), transparent 25%),
+    radial-gradient(circle at 80% 0%, rgba(167, 139, 250, 0.08), transparent 28%),
+    #0b1020;
+  color: #e4e4e7;
 }
 
 a,
 .green {
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
+  color: #fbbf24;
   transition: 0.4s;
   padding: 3px;
 }
 
 @media (hover: hover) {
   a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+    background-color: rgba(251, 191, 36, 0.15);
   }
 }
