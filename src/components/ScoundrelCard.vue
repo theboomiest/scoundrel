@@ -70,8 +70,8 @@ const handleClick = () => {
   flex-direction: column;
   gap: 0.85rem;
   width: 100%;
-  aspect-ratio: 7 / 10;
-  min-height: 240px;
+  height: 100%;
+  min-height: 0;
   text-align: left;
   border: 1px solid rgba(255, 214, 165, 0.65);
   background:

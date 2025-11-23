@@ -320,7 +320,7 @@ const handleDebugClick = () => {
 
     <div class="board-rail">
       <div class="board">
-        <template v-for="(card, idx) in state.board" :key="card ? card.id : `slot-${idx}`">
+        <div v-for="(card, idx) in state.board" :key="card ? card.id : `slot-${idx}`" class="slot">
           <ScoundrelCard
             v-if="card"
             :card="card"
@@ -329,7 +329,7 @@ const handleDebugClick = () => {
             @select="selectCard"
           />
           <div v-else class="slot-placeholder" aria-hidden="true"></div>
-        </template>
+        </div>
       </div>
     </div>
 
@@ -537,16 +537,29 @@ const handleDebugClick = () => {
 }
 
 .board {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
-  justify-content: center;
-  flex-wrap: nowrap;
+  justify-items: stretch;
+  align-items: stretch;
+  width: 100%;
+}
+
+.slot {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 7 / 10;
+}
+
+.slot > * {
+  position: absolute;
+  inset: 0;
 }
 
 .slot-placeholder {
   width: 100%;
-  aspect-ratio: 7 / 10;
-  min-height: 240px;
+  height: 100%;
+  min-height: 0;
   border: 1px dashed rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.02);
