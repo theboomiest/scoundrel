@@ -109,6 +109,55 @@ const canFlee = computed(
     boardCount.value === 4,
 )
 
+const contextActions = computed(() => {
+  if (state.status !== 'playing' || !state.selectedCard) return []
+  const card = state.selectedCard
+  const actions = []
+
+  if (card.type === 'monster') {
+    actions.push({
+      key: 'fight-unarmed',
+      label: 'Fight unarmed',
+      severity: 'info',
+      outlined: false,
+      disabled: false,
+      onClick: fightUnarmed,
+    })
+    actions.push({
+      key: 'use-weapon',
+      label: 'Use weapon',
+      severity: 'warning',
+      outlined: !canUseWeaponOn(card),
+      disabled: !canUseWeaponOn(card),
+      onClick: fightWithWeapon,
+    })
+  }
+
+  if (card.type === 'weapon') {
+    actions.push({
+      key: 'equip-weapon',
+      label: 'Equip weapon',
+      severity: 'info',
+      outlined: false,
+      disabled: false,
+      onClick: equipWeapon,
+    })
+  }
+
+  if (card.type === 'potion') {
+    actions.push({
+      key: 'drink-potion',
+      label: state.potionUsedThisRoom ? 'Potion already used' : 'Drink potion',
+      severity: 'success',
+      outlined: state.potionUsedThisRoom,
+      disabled: state.potionUsedThisRoom,
+      onClick: drinkPotion,
+    })
+  }
+
+  return actions
+})
+
 const startRun = () => {
   state.deck = createDeck()
   state.board = Array(4).fill(null)
@@ -321,13 +370,35 @@ const handleDebugClick = () => {
     <div class="board-rail">
       <div class="board">
         <div v-for="(card, idx) in state.board" :key="card ? card.id : `slot-${idx}`" class="slot">
-          <ScoundrelCard
-            v-if="card"
-            :card="card"
-            :disabled="state.status !== 'playing'"
-            :active="state.selectedCard && state.selectedCard.id === card.id"
-            @select="selectCard"
-          />
+          <template v-if="card">
+            <div class="card-surface">
+              <ScoundrelCard
+                :card="card"
+                :disabled="state.status !== 'playing'"
+                :active="state.selectedCard && state.selectedCard.id === card.id"
+                @select="selectCard"
+              />
+            </div>
+            <div
+              v-if="
+                state.selectedCard && state.selectedCard.id === card.id && contextActions.length
+              "
+              class="card-actions"
+            >
+              <div class="card-actions__list">
+                <Button
+                  v-for="action in contextActions"
+                  :key="action.key"
+                  :label="action.label"
+                  :severity="action.severity"
+                  :outlined="action.outlined"
+                  :disabled="action.disabled"
+                  type="button"
+                  @click="action.onClick"
+                />
+              </div>
+            </div>
+          </template>
           <div v-else class="slot-placeholder" aria-hidden="true"></div>
         </div>
       </div>
@@ -345,64 +416,6 @@ const handleDebugClick = () => {
           <p class="label">Weapon</p>
           <p class="value">{{ weaponLabel }}</p>
           <p class="hint">{{ weaponRuleLabel }}</p>
-        </div>
-      </div>
-      <div class="hud-block actions-block">
-        <p class="label">Actions</p>
-        <div class="footer-actions">
-          <div class="action-row">
-            <Button
-              label="Fight unarmed"
-              type="button"
-              severity="info"
-              :disabled="!state.selectedCard || state.selectedCard.type !== 'monster'"
-              :outlined="!state.selectedCard || state.selectedCard.type !== 'monster'"
-              @click="fightUnarmed"
-            />
-            <Button
-              label="Use weapon"
-              type="button"
-              severity="warning"
-              :disabled="
-                !state.selectedCard ||
-                state.selectedCard.type !== 'monster' ||
-                !canUseWeaponOn(state.selectedCard)
-              "
-              :outlined="
-                !state.selectedCard ||
-                state.selectedCard.type !== 'monster' ||
-                !canUseWeaponOn(state.selectedCard)
-              "
-              @click="fightWithWeapon"
-            />
-            <Button
-              label="Equip weapon"
-              type="button"
-              severity="info"
-              :disabled="!state.selectedCard || state.selectedCard.type !== 'weapon'"
-              :outlined="!state.selectedCard || state.selectedCard.type !== 'weapon'"
-              @click="equipWeapon"
-            />
-          </div>
-          <div class="action-row">
-            <Button
-              label="Drink potion"
-              type="button"
-              severity="success"
-              :disabled="
-                !state.selectedCard ||
-                state.selectedCard.type !== 'potion' ||
-                state.potionUsedThisRoom
-              "
-              :outlined="
-                !state.selectedCard ||
-                state.selectedCard.type !== 'potion' ||
-                state.potionUsedThisRoom
-              "
-              @click="drinkPotion"
-            />
-          </div>
-          <p class="hint">Select a card to enable actions</p>
         </div>
       </div>
       <div class="hud-block flee-block">
@@ -541,28 +554,32 @@ const handleDebugClick = () => {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
   justify-items: stretch;
-  align-items: stretch;
+  align-items: start;
   width: 100%;
 }
 
 .slot {
   position: relative;
   width: 100%;
-  aspect-ratio: 7 / 10;
-}
-
-.slot > * {
-  position: absolute;
-  inset: 0;
 }
 
 .slot-placeholder {
   width: 100%;
-  height: 100%;
-  min-height: 0;
+  aspect-ratio: 7 / 10;
   border: 1px dashed rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.02);
+}
+
+.card-surface {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 7 / 10;
+}
+
+.card-surface > * {
+  position: absolute;
+  inset: 0;
 }
 
 .empty-board {
@@ -573,14 +590,19 @@ const handleDebugClick = () => {
   background: rgba(255, 255, 255, 0.02);
 }
 
-.action-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
+.card-actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  display: grid;
+  padding: 0.7rem 1.5rem;
+  z-index: 3;
 }
 
-.flee-controls {
-  margin-top: 0.25rem;
+.card-actions__list {
+  display: grid;
+  gap: 0.6rem;
 }
 
 .debug-panel {
@@ -614,7 +636,7 @@ const handleDebugClick = () => {
   transform: translateX(-50%);
   width: min(1080px, calc(100% - 32px));
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
   background: linear-gradient(135deg, rgba(15, 12, 10, 0.95), rgba(22, 18, 16, 0.9));
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -624,19 +646,6 @@ const handleDebugClick = () => {
     0 16px 50px rgba(0, 0, 0, 0.55),
     0 -4px 18px rgba(0, 0, 0, 0.35);
   z-index: 3;
-}
-
-.actions-block {
-  grid-column: span 1;
-}
-
-.footer-actions {
-  display: grid;
-  gap: 0.5rem;
-}
-
-:deep(.footer-actions .p-button) {
-  width: 100%;
 }
 
 .flee-block {
