@@ -33,15 +33,26 @@ const handleHeroClick = () => {
             block damage from monsters. Survive the deck to win the run.
           </p>
           <div class="rules">
-            <p><strong>Monsters (clubs/spades):</strong> deal damage equal to their value.</p>
-            <p>
-              <strong>Weapons (diamonds):</strong> block damage up to their value, but only for
-              monsters weaker than the last one you blocked.
-            </p>
-            <p>
-              <strong>Potions (hearts):</strong> heal their value up to 20 health, but only the
-              first potion in a room heals.
-            </p>
+            <div class="rule-block">
+              <h3>The Dungeon</h3>
+              <p>
+                Each room is populated by 4 cards. You may flee a room to put those cards on the
+                bottom of the deck, or take actions for each card until only 1 card remains. Once 1
+                card is left, 3 cards are drawn to populate the next room.
+              </p>
+            </div>
+            <div class="rule-block">
+              <h3>The Cards</h3>
+              <p><strong>Monsters (clubs/spades):</strong> deal damage equal to their value.</p>
+              <p>
+                <strong>Weapons (diamonds):</strong> block damage up to their value, but only for
+                monsters weaker than the last one you blocked.
+              </p>
+              <p>
+                <strong>Potions (hearts):</strong> heal their value up to 20 health, but only the
+                first potion in a room heals.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -75,12 +86,12 @@ const handleHeroClick = () => {
   top: 50%;
   left: 50%;
   width: 40vw;
-  background: linear-gradient(135deg, hsla(20, 2%, 98%, 0.95), hsla(20, 3%, 96%, 0.95));
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(170deg, hsla(0, 0%, 12%, 0.95), hsla(0, 0%, 4%, 0.95));
+  border: 0.3rem solid rgba(150, 150, 150, 0.6);
+  border-radius: 2px;
   padding: 1.5rem;
-  border-radius: 22px;
   box-shadow: 0 16px 45px rgba(0, 0, 0, 0.4);
-  color: hsl(20, 4%, 4%);
+  color: hsl(0, 0%, 88%);
   transition:
     transform 0.4s ease,
     opacity 0.4s ease,
@@ -94,7 +105,7 @@ const handleHeroClick = () => {
   transform-origin: center center;
   perspective-origin: center center;
   transform: translate(-50%, -50%) translateX(-40vw) perspective(800px) rotateY(45deg) scale(0.6);
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  box-shadow: 2px 4px 20px rgba(0, 0, 0, 0.4);
   cursor: pointer;
 }
 
@@ -120,32 +131,30 @@ h1 {
 
 .lede {
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.4rem;
   display: grid;
   gap: 0.5rem;
 }
 
 .rules {
   display: grid;
-  gap: 0.25rem;
-  padding: 0.75rem 0.85rem;
-  background: hsla(199, 54%, 50%, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 1.6rem;
+  padding: 1rem;
+  background: hsla(199, 65%, 55%, 0.2);
   border-radius: 12px;
-  color: hsl(210, 6%, 7%);
+}
+
+.rule-block {
+  display: grid;
+  gap: 0.2rem;
 }
 
 .hero-close {
   position: absolute;
   top: 12px;
   right: 12px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
   font-weight: 700;
   text-transform: uppercase;
-}
-
-.hero__badge {
-  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.35));
 }
 
 @media (max-width: 640px) {

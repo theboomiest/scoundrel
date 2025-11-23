@@ -88,11 +88,6 @@ const weaponLabel = computed(() => {
   if (!state.weapon) return 'None'
   return `${state.weapon.rank} of ${formatSuit(state.weapon.suit)}`
 })
-const weaponRuleLabel = computed(() => {
-  if (!state.weapon) return 'Equip a diamond card to block'
-  if (state.lastWeaponUseValue === null) return 'Next use: any monster'
-  return `Next use: monster under ${state.lastWeaponUseValue}`
-})
 
 const statusLabel = computed(() => {
   if (state.status === 'won') return 'Victory! You cleared the dungeon!'
@@ -579,14 +574,6 @@ const handleDebugClick = () => {
   inset: 0;
 }
 
-.empty-board {
-  grid-column: 1 / -1;
-  padding: 1rem;
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.02);
-}
-
 .card-actions {
   position: absolute;
   left: 0;
@@ -600,16 +587,6 @@ const handleDebugClick = () => {
 .card-actions__list {
   display: grid;
   gap: 0.6rem;
-}
-
-.debug-panel {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px dashed rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 0.9rem 1.1rem;
-  display: grid;
-  gap: 0.35rem;
-  color: rgba(228, 228, 231, 0.8);
 }
 
 .debug-row {
@@ -660,15 +637,6 @@ const handleDebugClick = () => {
 .board-shell {
   position: relative;
   width: 100%;
-}
-
-.stat-group {
-  display: grid;
-  gap: 0.04rem;
-}
-
-.weapon-group {
-  margin-top: 0.35rem;
 }
 
 .health-row {
