@@ -1,9 +1,12 @@
 <script setup>
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import ScoundrelCard from './ScoundrelCard.vue'
+
+const emit = defineEmits(['run-started'])
 
 const maxHealth = 20
 const isDev = import.meta.env.DEV
+const debugCollapsed = ref(true)
 
 const ranks = [
   { label: '2', value: 2 },
@@ -121,6 +124,7 @@ const startRun = () => {
   state.selectedCard = null
   state.roomInteracted = false
   state.previousRoomFled = false
+  emit('run-started')
   drawNewRoom(4)
 }
 
@@ -197,7 +201,7 @@ const resolveCard = (card) => {
 
   if (state.health <= 0) {
     state.status = 'lost'
-    state.message = 'You fall in the gutter. Try again.'
+    state.message = 'You fall in the dungeon. Try again.'
     return
   }
 
@@ -269,17 +273,21 @@ const restoreFullHealth = () => {
   }
   state.message = 'Health restored (debug).'
 }
+
+const toggleDebug = () => {
+  debugCollapsed.value = !debugCollapsed.value
+}
+
+const handleDebugClick = () => {
+  if (debugCollapsed.value) {
+    debugCollapsed.value = false
+  }
+}
 </script>
 
 <template>
   <section class="game-shell">
     <header class="game-hud">
-      <div class="hud-block">
-        <p class="label">Health</p>
-        <p class="value" :data-warn="state.health <= maxHealth * 0.25">
-          {{ state.health }} / {{ maxHealth }}
-        </p>
-      </div>
       <div class="hud-block">
         <p class="label">Deck</p>
         <p class="value">{{ deckCount }}</p>
@@ -287,11 +295,6 @@ const restoreFullHealth = () => {
       <div class="hud-block">
         <p class="label">Board</p>
         <p class="value">{{ boardCount }}</p>
-      </div>
-      <div class="hud-block">
-        <p class="label">Weapon</p>
-        <p class="value">{{ weaponLabel }}</p>
-        <p class="hint">{{ weaponRuleLabel }}</p>
       </div>
       <div class="hud-block">
         <p class="label">Room</p>
@@ -315,8 +318,95 @@ const restoreFullHealth = () => {
       </p>
     </div>
 
-    <div class="flee-row">
-      <div class="action-row">
+    <div class="board-rail">
+      <div class="board">
+        <template v-for="(card, idx) in state.board" :key="card ? card.id : `slot-${idx}`">
+          <ScoundrelCard
+            v-if="card"
+            :card="card"
+            :disabled="state.status !== 'playing'"
+            :active="state.selectedCard && state.selectedCard.id === card.id"
+            @select="selectCard"
+          />
+          <div v-else class="slot-placeholder" aria-hidden="true"></div>
+        </template>
+      </div>
+    </div>
+
+    <footer class="footer-hud">
+      <div class="hud-block">
+        <div class="stat-group">
+          <p class="label">Health</p>
+          <p class="value" :data-warn="state.health <= maxHealth * 0.25">
+            {{ state.health }} / {{ maxHealth }}
+          </p>
+        </div>
+        <div class="stat-group weapon-group">
+          <p class="label">Weapon</p>
+          <p class="value">{{ weaponLabel }}</p>
+          <p class="hint">{{ weaponRuleLabel }}</p>
+        </div>
+      </div>
+      <div class="hud-block actions-block">
+        <p class="label">Actions</p>
+        <div class="footer-actions">
+          <div class="action-row">
+            <Button
+              label="Fight unarmed"
+              type="button"
+              severity="info"
+              :disabled="!state.selectedCard || state.selectedCard.type !== 'monster'"
+              :outlined="!state.selectedCard || state.selectedCard.type !== 'monster'"
+              @click="fightUnarmed"
+            />
+            <Button
+              label="Use weapon"
+              type="button"
+              severity="warning"
+              :disabled="
+                !state.selectedCard ||
+                state.selectedCard.type !== 'monster' ||
+                !canUseWeaponOn(state.selectedCard)
+              "
+              :outlined="
+                !state.selectedCard ||
+                state.selectedCard.type !== 'monster' ||
+                !canUseWeaponOn(state.selectedCard)
+              "
+              @click="fightWithWeapon"
+            />
+            <Button
+              label="Equip weapon"
+              type="button"
+              severity="info"
+              :disabled="!state.selectedCard || state.selectedCard.type !== 'weapon'"
+              :outlined="!state.selectedCard || state.selectedCard.type !== 'weapon'"
+              @click="equipWeapon"
+            />
+          </div>
+          <div class="action-row">
+            <Button
+              label="Drink potion"
+              type="button"
+              severity="success"
+              :disabled="
+                !state.selectedCard ||
+                state.selectedCard.type !== 'potion' ||
+                state.potionUsedThisRoom
+              "
+              :outlined="
+                !state.selectedCard ||
+                state.selectedCard.type !== 'potion' ||
+                state.potionUsedThisRoom
+              "
+              @click="drinkPotion"
+            />
+          </div>
+          <p class="hint">Select a card to enable actions</p>
+        </div>
+      </div>
+      <div class="hud-block flee-block">
+        <p class="label">Room Exit</p>
         <Button
           label="Flee this room"
           type="button"
@@ -326,99 +416,39 @@ const restoreFullHealth = () => {
           @click="fleeRoom"
         />
       </div>
-      <p class="hint">You can only flee before acting and never two rooms in a row.</p>
-    </div>
-
-    <div class="board">
-      <template v-for="(card, idx) in state.board" :key="card ? card.id : `slot-${idx}`">
-        <ScoundrelCard
-          v-if="card"
-          :card="card"
-          :disabled="state.status !== 'playing'"
-          :active="state.selectedCard && state.selectedCard.id === card.id"
-          @select="selectCard"
-        />
-        <div v-else class="slot-placeholder" aria-hidden="true"></div>
-      </template>
-    </div>
-
-    <div v-if="state.selectedCard" class="action-panel">
-      <div class="action-header">
-        <p class="action-title">Actions for {{ formatCardLabel(state.selectedCard) }}</p>
-        <Button
-          label="Cancel"
-          type="button"
-          severity="secondary"
-          outlined
-          @click="state.selectedCard = null"
-        />
-      </div>
-
-      <template v-if="state.selectedCard.type === 'monster'">
-        <div class="action-row">
-          <Button label="Fight unarmed" type="button" severity="info" @click="fightUnarmed" />
-          <Button
-            label="Use weapon"
-            type="button"
-            severity="warning"
-            :disabled="!canUseWeaponOn(state.selectedCard)"
-            @click="fightWithWeapon"
-          />
-        </div>
-        <p class="hint">
-          Weapon can only block monsters weaker than the last one you blocked
-          {{ state.lastWeaponUseValue ? `(last: ${state.lastWeaponUseValue})` : '' }}.
-        </p>
-      </template>
-
-      <template v-else-if="state.selectedCard.type === 'weapon'">
-        <div class="action-row">
-          <Button label="Equip weapon" type="button" severity="info" @click="equipWeapon" />
-        </div>
-        <p class="hint">Replaces your current weapon.</p>
-      </template>
-
-      <template v-else>
-        <div class="action-row">
-          <Button
-            label="Drink potion"
-            type="button"
-            severity="success"
-            :disabled="state.potionUsedThisRoom"
-            @click="drinkPotion"
-          />
-        </div>
-        <p class="hint">
-          Only the first potion per room heals
-          {{ state.potionUsedThisRoom ? '(already used this room)' : '' }}.
-        </p>
-      </template>
-    </div>
-
-    <footer class="legend">
-      <p><strong>Clubs/Spades</strong> are monsters; they deal damage equal to card value.</p>
-      <p>
-        <strong>Diamonds</strong> are weapons; they block their value, but only on monsters weaker
-        than the last one blocked.
-      </p>
-      <p><strong>Hearts</strong> are potions; only the first potion each room heals.</p>
     </footer>
 
-    <div v-if="isDev" class="debug-panel">
-      <div class="debug-row">
-        <p><strong>Deck (top to bottom)</strong></p>
-        <Button
-          label="Restore full health (debug)"
-          type="button"
-          severity="secondary"
-          outlined
-          @click="restoreFullHealth"
-        />
-      </div>
-      <div class="debug-list">
-        <span v-for="(card, idx) in state.deck" :key="card.id">
-          {{ idx + 1 }}. {{ formatCardLabel(card) }}
-        </span>
+    <div
+      v-if="isDev"
+      class="debug-shell"
+      :class="{ 'debug-shell--collapsed': debugCollapsed }"
+      @click="handleDebugClick"
+    >
+      <div class="debug-panel">
+        <div class="debug-row">
+          <p><strong>Deck (top to bottom)</strong></p>
+          <div class="debug-actions">
+            <Button
+              label="Restore full health (debug)"
+              type="button"
+              severity="secondary"
+              outlined
+              @click.stop="restoreFullHealth"
+            />
+            <Button
+              :label="debugCollapsed ? 'Open debug' : 'Stow debug'"
+              type="button"
+              severity="help"
+              outlined
+              @click.stop="toggleDebug"
+            />
+          </div>
+        </div>
+        <div class="debug-list">
+          <span v-for="(card, idx) in state.deck" :key="card.id">
+            {{ idx + 1 }}. {{ formatCardLabel(card) }}
+          </span>
+        </div>
       </div>
     </div>
   </section>
@@ -426,12 +456,13 @@ const restoreFullHealth = () => {
 
 <style scoped>
 .game-shell {
-  width: min(1100px, 100%);
+  width: min(1080px, 100%);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
   color: #e4e4e7;
+  padding-bottom: 280px;
 }
 
 .game-hud {
@@ -449,7 +480,9 @@ const restoreFullHealth = () => {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: 14px;
-  padding: 0.6rem 0.75rem;
+  padding: 0.9rem 0.9rem;
+  display: grid;
+  gap: 0.3rem;
 }
 
 .label {
@@ -457,12 +490,15 @@ const restoreFullHealth = () => {
   font-size: 0.75rem;
   letter-spacing: 0.04em;
   color: rgba(228, 228, 231, 0.7);
+  margin: 0;
+  line-height: 1.2;
 }
 
 .value {
   font-size: 1.4rem;
   font-weight: 700;
-  margin: 0.1rem 0 0;
+  margin: 0.02rem 0 0;
+  line-height: 1.2;
 }
 
 .value[data-warn='true'] {
@@ -501,13 +537,15 @@ const restoreFullHealth = () => {
 }
 
 .board {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 240px));
-  gap: 0.85rem;
+  display: flex;
+  gap: 1rem;
   justify-content: center;
+  flex-wrap: nowrap;
 }
 
 .slot-placeholder {
+  width: 100%;
+  aspect-ratio: 7 / 10;
   min-height: 240px;
   border: 1px dashed rgba(255, 255, 255, 0.08);
   border-radius: 16px;
@@ -522,47 +560,14 @@ const restoreFullHealth = () => {
   background: rgba(255, 255, 255, 0.02);
 }
 
-.legend {
-  color: rgba(228, 228, 231, 0.75);
-  display: grid;
-  gap: 0.25rem;
-  font-size: 0.95rem;
-}
-
-.action-panel {
-  background: rgba(24, 24, 27, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 1rem 1.25rem;
-  border-radius: 14px;
-  display: grid;
-  gap: 0.4rem;
-}
-
-.action-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.action-title {
-  margin: 0;
-  font-weight: 700;
-}
-
 .action-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
 }
 
-.flee-row {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 0.75rem 1rem;
-  display: grid;
-  gap: 0.35rem;
+.flee-controls {
+  margin-top: 0.25rem;
 }
 
 .debug-panel {
@@ -587,6 +592,101 @@ const restoreFullHealth = () => {
   flex-wrap: wrap;
   gap: 0.4rem 0.8rem;
   font-size: 0.9rem;
+}
+
+.footer-hud {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  width: min(1080px, calc(100% - 32px));
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  background: linear-gradient(135deg, rgba(15, 12, 10, 0.95), rgba(22, 18, 16, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+  box-shadow:
+    0 16px 50px rgba(0, 0, 0, 0.55),
+    0 -4px 18px rgba(0, 0, 0, 0.35);
+  z-index: 3;
+}
+
+.actions-block {
+  grid-column: span 1;
+}
+
+.footer-actions {
+  display: grid;
+  gap: 0.5rem;
+}
+
+:deep(.footer-actions .p-button) {
+  width: 100%;
+}
+
+.flee-block {
+  display: grid;
+  align-content: center;
+  gap: 0.35rem;
+}
+
+.board-rail {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(1080px, 100%);
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0 0.5rem;
+  z-index: 2;
+}
+
+.stat-group {
+  display: grid;
+  gap: 0.04rem;
+}
+
+.weapon-group {
+  margin-top: 0.35rem;
+}
+
+.debug-shell {
+  position: fixed;
+  width: 400px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  transition:
+    transform 0.4s ease,
+    opacity 0.4s ease,
+    filter 0.4s ease;
+}
+
+.debug-shell--collapsed {
+  transform-origin: center center;
+  transform: translate(-50%, -50%) translateX(40vw) scale(0.8);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  cursor: pointer;
+}
+
+.debug-panel {
+  background: rgba(24, 24, 27, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 0.9rem 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+  color: rgba(228, 228, 231, 0.9);
+  box-shadow: 0 12px 38px rgba(0, 0, 0, 0.45);
+}
+
+.debug-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 @media (max-width: 640px) {

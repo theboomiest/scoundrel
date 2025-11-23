@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Iceberg&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Iceberg&family=Noto+Sans:wght@400;600;700&display=swap');
 @import './base.css';
 
 #app {
@@ -11,7 +11,7 @@
 }
 
 body {
-  min-height: 100vh;
+  height: 100vh;
   position: relative;
   overflow: hidden;
   background:
@@ -33,8 +33,15 @@ body {
     ),
     linear-gradient(180deg, hsl(20, 20%, 14%), hsl(10, 16%, 4%));
   color: hsl(20, 2, 99);
-  font-family: 'Iceberg', 'EB Garamond', 'Cormorant Garamond', 'Times New Roman', serif;
+  font-family: 'Noto Sans', 'EB Garamond', 'Cormorant Garamond', 'Times New Roman', serif;
   letter-spacing: 0.02em;
+}
+
+h1,
+h2,
+h3,
+.eyebrow {
+  font-family: 'Iceberg', 'Noto Sans', sans-serif;
 }
 
 body::before,
@@ -47,7 +54,7 @@ body::after {
   pointer-events: none;
   background: linear-gradient(180deg, #2c231c, #181210);
   opacity: 1;
-  transform-origin: center;
+  transform-origin: center center;
   filter: drop-shadow(0 20px 20px rgba(0, 0, 0, 0.2));
   z-index: 1;
 }

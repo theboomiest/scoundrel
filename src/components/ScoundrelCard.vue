@@ -165,10 +165,11 @@ const handleClick = () => {
   gap: 0.25rem;
   width: 100%;
   text-align: center;
+  font-family: 'Iceberg', 'Noto Sans', sans-serif;
 }
 
 .rank {
-  font-size: 2.8rem;
+  font-size: 4.5rem;
   font-weight: 800;
 }
 

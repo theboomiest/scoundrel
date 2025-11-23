@@ -1,23 +1,57 @@
 <script setup>
+import { ref } from 'vue'
 import ScoundrelGame from './components/ScoundrelGame.vue'
-import logo from './assets/logo.svg'
+
+const heroCollapsed = ref(false)
+
+const handleRunStarted = () => {
+  heroCollapsed.value = true
+}
+
+const toggleHero = () => {
+  heroCollapsed.value = !heroCollapsed.value
+}
+
+const handleHeroClick = () => {
+  if (heroCollapsed.value) {
+    heroCollapsed.value = false
+  }
+}
 </script>
 
 <template>
   <main class="app-shell">
-    <header class="hero">
+    <div class="hero-backdrop" :class="{ 'hero-backdrop--visible': !heroCollapsed }"></div>
+
+    <header class="hero" :class="{ 'hero--collapsed': heroCollapsed }" @click="handleHeroClick">
       <div>
         <p class="eyebrow">Solo Card Crawler</p>
-        <h1>Scoundrel</h1>
-        <p class="lede">
-          Clear the dungeon rooms by resolving each card. Monsters hurt, potions heal, weapons block
-          damage from monsters. Survive the deck to win the run.
-        </p>
+        <h1 class="title">Scoundrel</h1>
+        <div class="lede">
+          <p>
+            Clear the dungeon rooms by resolving each card. Monsters hurt, potions heal, weapons
+            block damage from monsters. Survive the deck to win the run.
+          </p>
+          <div class="rules">
+            <p><strong>Monsters (clubs/spades):</strong> deal damage equal to their value.</p>
+            <p>
+              <strong>Weapons (diamonds):</strong> block damage up to their value, but only for
+              monsters weaker than the last one you blocked.
+            </p>
+            <p>
+              <strong>Potions (hearts):</strong> heal their value up to 20 health, but only the
+              first potion in a room heals.
+            </p>
+          </div>
+          <button class="hero-toggle" type="button" @click.stop="toggleHero">
+            {{ heroCollapsed ? 'Return to center' : 'Stow on wall' }}
+          </button>
+        </div>
       </div>
-      <img alt="Scoundrel hero" class="hero__badge" :src="logo" width="96" height="96" />
+      <!-- <img alt="Scoundrel hero" class="hero__badge" :src="logo" width="96" height="96" /> -->
     </header>
 
-    <ScoundrelGame />
+    <ScoundrelGame @run-started="handleRunStarted" />
   </main>
 </template>
 
@@ -32,21 +66,46 @@ import logo from './assets/logo.svg'
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, rgba(59, 7, 100, 0.6), rgba(8, 47, 73, 0.6));
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 40vw;
+  background: linear-gradient(135deg, hsla(20, 2%, 98%, 0.95), hsla(20, 3%, 96%, 0.95));
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 1.5rem;
   border-radius: 22px;
   box-shadow: 0 16px 45px rgba(0, 0, 0, 0.4);
-  color: #f8fafc;
+  color: hsl(20, 4%, 4%);
+  transition:
+    transform 0.4s ease,
+    opacity 0.4s ease,
+    filter 0.4s ease;
+  transform-origin: center center;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+}
+
+.hero--collapsed {
+  transform-origin: center center;
+  perspective-origin: center center;
+  transform: translate(-50%, -50%) translateX(-40vw) perspective(800px) rotateY(45deg) scale(0.6);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  cursor: pointer;
+}
+
+.title {
+  font-weight: 900;
+  font-size: 5rem;
+  line-height: 6rem;
 }
 
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 700;
-  font-size: 0.8rem;
-  color: rgba(248, 250, 252, 0.8);
-  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+  margin-bottom: -0.5rem;
+  opacity: 0.7;
 }
 
 h1 {
@@ -56,9 +115,39 @@ h1 {
 
 .lede {
   margin: 0;
-  max-width: 640px;
-  color: rgba(248, 250, 252, 0.85);
+  max-width: 720px;
   line-height: 1.5;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.rules {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem 0.85rem;
+  background: hsla(199, 61%, 24%, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+}
+
+.hero-toggle {
+  align-self: start;
+  justify-self: start;
+  padding: 0.35rem 0.75rem;
+  background: rgba(8, 47, 73, 0.6);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.hero-toggle:hover {
+  background: rgba(59, 7, 100, 0.6);
+  transform: translateY(-1px);
 }
 
 .hero__badge {
@@ -71,5 +160,19 @@ h1 {
     align-items: flex-start;
     gap: 1rem;
   }
+}
+
+.hero-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.hero-backdrop--visible {
+  opacity: 1;
 }
 </style>
