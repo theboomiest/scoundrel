@@ -43,11 +43,16 @@ const handleHeroClick = () => {
               first potion in a room heals.
             </p>
           </div>
-          <button class="hero-toggle" type="button" @click.stop="toggleHero">
-            {{ heroCollapsed ? 'Return to center' : 'Stow on wall' }}
-          </button>
         </div>
       </div>
+      <Button
+        class="hero-close"
+        type="button"
+        label="X"
+        severity="secondary"
+        outlined
+        @click.stop="toggleHero"
+      />
       <!-- <img alt="Scoundrel hero" class="hero__badge" :src="logo" width="96" height="96" /> -->
     </header>
 
@@ -115,7 +120,6 @@ h1 {
 
 .lede {
   margin: 0;
-  max-width: 720px;
   line-height: 1.5;
   display: grid;
   gap: 0.5rem;
@@ -125,29 +129,19 @@ h1 {
   display: grid;
   gap: 0.25rem;
   padding: 0.75rem 0.85rem;
-  background: hsla(199, 61%, 24%, 0.4);
+  background: hsla(199, 54%, 50%, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
+  color: hsl(210, 6%, 7%);
 }
 
-.hero-toggle {
-  align-self: start;
-  justify-self: start;
-  padding: 0.35rem 0.75rem;
-  background: rgba(8, 47, 73, 0.6);
-  color: #f8fafc;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease;
-}
-
-.hero-toggle:hover {
-  background: rgba(59, 7, 100, 0.6);
-  transform: translateY(-1px);
+.hero-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .hero__badge {
