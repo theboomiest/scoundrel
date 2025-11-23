@@ -89,17 +89,19 @@ const weaponLabel = computed(() => {
   return `${state.weapon.rank} of ${formatSuit(state.weapon.suit)}`
 })
 const weaponRuleLabel = computed(() => {
-  if (!state.weapon) return 'Equip a diamond to block.'
-  if (state.lastWeaponUseValue === null) return 'Next use: any monster.'
+  if (!state.weapon) return 'Equip a diamond card to block'
+  if (state.lastWeaponUseValue === null) return 'Next use: any monster'
   return `Next use: monster under ${state.lastWeaponUseValue}`
 })
 
 const statusLabel = computed(() => {
   if (state.status === 'won') return 'Victory! You cleared the dungeon!'
   if (state.status === 'lost') return 'Defeated. Your run ends here.'
-  if (state.status === 'playing') return state.message || 'Choose a card to resolve.'
+  if (state.status === 'playing') return state.message || 'Choose a card to resolve'
   return state.message
 })
+
+const healthPercent = computed(() => Math.max(0, Math.min(100, (state.health / maxHealth) * 100)))
 
 const canFlee = computed(
   () =>
@@ -336,30 +338,6 @@ const handleDebugClick = () => {
 
 <template>
   <section class="game-shell">
-    <header class="game-hud">
-      <div class="hud-block">
-        <p class="label">Deck</p>
-        <p class="value">{{ deckCount }}</p>
-      </div>
-      <div class="hud-block">
-        <p class="label">Board</p>
-        <p class="value">{{ boardCount }}</p>
-      </div>
-      <div class="hud-block">
-        <p class="label">Room</p>
-        <p class="value">{{ roomLabel }}</p>
-      </div>
-      <div class="hud-actions">
-        <Button
-          :label="state.status === 'playing' ? 'Restart Run' : 'Start New Run'"
-          type="button"
-          severity="warn"
-          @click="startRun"
-        />
-        <span class="turn">Turn {{ state.turn }}</span>
-      </div>
-    </header>
-
     <div class="status">
       <p class="status__text">{{ statusLabel }}</p>
       <p v-if="state.status === 'won'" class="status__hint">
@@ -368,66 +346,106 @@ const handleDebugClick = () => {
     </div>
 
     <div class="board-rail">
-      <div class="board">
-        <div v-for="(card, idx) in state.board" :key="card ? card.id : `slot-${idx}`" class="slot">
-          <template v-if="card">
-            <div class="card-surface">
-              <ScoundrelCard
-                :card="card"
-                :disabled="state.status !== 'playing'"
-                :active="state.selectedCard && state.selectedCard.id === card.id"
-                @select="selectCard"
-              />
-            </div>
-            <div
-              v-if="
-                state.selectedCard && state.selectedCard.id === card.id && contextActions.length
-              "
-              class="card-actions"
-            >
-              <div class="card-actions__list">
-                <Button
-                  v-for="action in contextActions"
-                  :key="action.key"
-                  :label="action.label"
-                  :severity="action.severity"
-                  :outlined="action.outlined"
-                  :disabled="action.disabled"
-                  type="button"
-                  @click="action.onClick"
+      <div class="board-shell">
+        <div class="flee-floating">
+          <Button
+            label="Flee this room"
+            type="button"
+            severity="help"
+            outlined
+            :disabled="!canFlee"
+            @click="fleeRoom"
+          />
+        </div>
+        <div class="board">
+          <div
+            v-for="(card, idx) in state.board"
+            :key="card ? card.id : `slot-${idx}`"
+            class="slot"
+          >
+            <template v-if="card">
+              <div class="card-surface">
+                <ScoundrelCard
+                  :card="card"
+                  :disabled="state.status !== 'playing'"
+                  :active="state.selectedCard && state.selectedCard.id === card.id"
+                  @select="selectCard"
                 />
               </div>
-            </div>
-          </template>
-          <div v-else class="slot-placeholder" aria-hidden="true"></div>
+              <div
+                v-if="
+                  state.selectedCard && state.selectedCard.id === card.id && contextActions.length
+                "
+                class="card-actions"
+              >
+                <div class="card-actions__list">
+                  <Button
+                    v-for="action in contextActions"
+                    :key="action.key"
+                    :label="action.label"
+                    :severity="action.severity"
+                    :outlined="action.outlined"
+                    :disabled="action.disabled"
+                    type="button"
+                    @click="action.onClick"
+                  />
+                </div>
+              </div>
+            </template>
+            <div v-else class="slot-placeholder" aria-hidden="true"></div>
+          </div>
         </div>
       </div>
     </div>
 
     <footer class="footer-hud">
-      <div class="hud-block">
-        <div class="stat-group">
+      <div class="health-row">
+        <div class="health-header">
           <p class="label">Health</p>
-          <p class="value" :data-warn="state.health <= maxHealth * 0.25">
+          <p class="value health-value" :data-warn="state.health <= maxHealth * 0.25">
             {{ state.health }} / {{ maxHealth }}
           </p>
         </div>
-        <div class="stat-group weapon-group">
-          <p class="label">Weapon</p>
-          <p class="value">{{ weaponLabel }}</p>
-          <p class="hint">{{ weaponRuleLabel }}</p>
+        <div
+          class="health-bar"
+          role="progressbar"
+          :aria-valuemin="0"
+          :aria-valuemax="maxHealth"
+          :aria-valuenow="state.health"
+        >
+          <div class="health-bar__fill" :style="{ width: `${healthPercent}%` }"></div>
         </div>
       </div>
-      <div class="hud-block flee-block">
-        <p class="label">Room Exit</p>
-        <Button
-          label="Flee this room"
-          type="button"
-          severity="help"
-          outlined
-          :disabled="!canFlee"
-          @click="fleeRoom"
-        />
+
+      <div class="footer-grid">
+        <div class="hud-block weapon-block">
+          <div class="stat-group weapon-group">
+            <p class="label">Weapon</p>
+            <p class="value">{{ weaponLabel }}</p>
+            <p class="hint">{{ weaponRuleLabel }}</p>
+          </div>
+        </div>
+        <div class="hud-block">
+          <p class="label">Deck</p>
+          <p class="value">{{ deckCount }}</p>
+        </div>
+        <div class="hud-block">
+          <p class="label">Board</p>
+          <p class="value">{{ boardCount }}</p>
+        </div>
+        <div class="hud-block">
+          <p class="label">Room</p>
+          <p class="value">{{ roomLabel }}</p>
+        </div>
+        <div class="hud-block restart-block">
+          <Button
+            :label="state.status === 'playing' ? 'Restart Run' : 'Start New Run'"
+            type="button"
+            severity="warn"
+            @click="startRun"
+          />
+          <span class="turn">Turn {{ state.turn }}</span>
+        </div>
       </div>
     </footer>
 
@@ -478,17 +496,6 @@ const handleDebugClick = () => {
   padding-bottom: 280px;
 }
 
-.game-hud {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.75rem;
-  background: linear-gradient(135deg, rgba(24, 24, 27, 0.9), rgba(9, 9, 11, 0.85));
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 1rem 1.25rem;
-  border-radius: 18px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
-}
-
 .hud-block {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.03);
@@ -516,14 +523,6 @@ const handleDebugClick = () => {
 
 .value[data-warn='true'] {
   color: #fca5a5;
-}
-
-.hud-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  grid-column: span 2;
 }
 
 .turn {
@@ -635,8 +634,8 @@ const handleDebugClick = () => {
   bottom: 18px;
   transform: translateX(-50%);
   width: min(1080px, calc(100% - 32px));
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
   background: linear-gradient(135deg, rgba(15, 12, 10, 0.95), rgba(22, 18, 16, 0.9));
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -646,12 +645,6 @@ const handleDebugClick = () => {
     0 16px 50px rgba(0, 0, 0, 0.55),
     0 -4px 18px rgba(0, 0, 0, 0.35);
   z-index: 3;
-}
-
-.flee-block {
-  display: grid;
-  align-content: center;
-  gap: 0.35rem;
 }
 
 .board-rail {
@@ -666,6 +659,11 @@ const handleDebugClick = () => {
   z-index: 2;
 }
 
+.board-shell {
+  position: relative;
+  width: 100%;
+}
+
 .stat-group {
   display: grid;
   gap: 0.04rem;
@@ -673,6 +671,63 @@ const handleDebugClick = () => {
 
 .weapon-group {
   margin-top: 0.35rem;
+}
+
+.health-row {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.health-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.health-value {
+  font-size: 1rem;
+}
+
+.health-bar {
+  position: relative;
+  width: 100%;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.health-bar__fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.35);
+  transition: width 0.25s ease;
+  border-radius: inherit;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.restart-block {
+  display: grid;
+  gap: 0.4rem;
+  align-content: start;
+}
+
+.flee-floating {
+  position: absolute;
+  top: -3.5rem;
+  left: 1rem;
+  z-index: 4;
 }
 
 .debug-shell {
@@ -712,10 +767,8 @@ const handleDebugClick = () => {
 }
 
 @media (max-width: 640px) {
-  .hud-actions {
-    grid-column: span 1;
-    flex-direction: column;
-    align-items: flex-start;
+  .footer-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   }
 }
 </style>
