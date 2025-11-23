@@ -418,12 +418,10 @@ const handleDebugClick = () => {
       </div>
 
       <div class="footer-grid">
-        <div class="hud-block weapon-block">
-          <div class="stat-group weapon-group">
-            <p class="label">Weapon</p>
-            <p class="value">{{ weaponLabel }}</p>
-            <p class="hint">{{ weaponRuleLabel }}</p>
-          </div>
+        <div class="hud-block">
+          <p class="label">Weapon</p>
+          <p class="value">{{ weaponLabel }}</p>
+          <!-- <p class="hint">{{ weaponRuleLabel }}</p> -->
         </div>
         <div class="hud-block">
           <p class="label">Deck</p>
