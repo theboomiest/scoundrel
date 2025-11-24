@@ -6,10 +6,10 @@ const heroCollapsed = ref(false)
 const wallProgress = ref(0)
 
 const wallPalette = {
-  startTop: '#6b7c8f',
-  startBottom: '#4b5666',
-  endTop: '#7f1d1d',
-  endBottom: '#0b0b0c',
+  startTop: '#575e66',
+  startBottom: '#3d4247',
+  endTop: '#2e1e1f',
+  endBottom: '#120b0c',
 }
 
 const handleRunStarted = () => {
@@ -38,10 +38,7 @@ const hexToRgb = (hex) => {
   }
 }
 
-const rgbToHex = (r, g, b) =>
-  `#${[r, g, b]
-    .map((v) => v.toString(16).padStart(2, '0'))
-    .join('')}`
+const rgbToHex = (r, g, b) => `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`
 
 const mixColor = (from, to, t) => {
   const a = hexToRgb(from)
