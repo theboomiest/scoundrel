@@ -86,8 +86,8 @@ const handleHeroClick = () => {
   top: 50%;
   left: 50%;
   width: 40vw;
-  background: linear-gradient(170deg, hsla(0, 0%, 12%, 0.95), hsla(0, 0%, 4%, 0.95));
-  border: 0.3rem solid rgba(150, 150, 150, 0.6);
+  background: linear-gradient(170deg, hsla(0, 0%, 12%, 0.99), hsla(0, 0%, 4%, 0.99));
+  border: 0.3rem solid rgba(150, 150, 150, 0.2);
   border-radius: 2px;
   padding: 1.5rem;
   box-shadow: 0 16px 45px rgba(0, 0, 0, 0.4);
