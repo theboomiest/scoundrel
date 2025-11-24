@@ -17,9 +17,9 @@ body {
   background:
     linear-gradient(
       to top,
-      hsl(0, 2%, 16%) 0px,
-      hsl(10, 3%, 14%) 20vh,
-      hsl(10, 4%, 10%) 30vh,
+      hsl(0, 3%, 23%) 0px,
+      hsl(0, 3%, 22%) 20vh,
+      hsl(20, 7%, 18%) 30vh,
       transparent 30vh,
       transparent 100%
     ),
@@ -31,7 +31,9 @@ body {
       transparent 14vh,
       transparent 100%
     ),
+    radial-gradient(farthest-side, #ffffff00, #00000050),
     linear-gradient(180deg, var(--wall-start, #2c231c), var(--wall-end, #181210));
+  background-blend-mode: normal, normal, multiply, normal;
   color: hsl(20, 2, 99);
   font-family: 'Noto Sans', 'EB Garamond', 'Cormorant Garamond', 'Times New Roman', serif;
   letter-spacing: 0.02em;
@@ -52,10 +54,12 @@ body::after {
   bottom: 0;
   width: 26vw;
   pointer-events: none;
-  background: linear-gradient(180deg, var(--wall-start, #2c231c), var(--wall-end, #181210));
+  background:
+    radial-gradient(circle at center, #ffffff00, #00000050),
+    linear-gradient(180deg, var(--wall-start, #2c231c), var(--wall-end, #181210));
   opacity: 1;
   transform-origin: center center;
-  filter: drop-shadow(0 20px 20px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.2));
   z-index: 1;
 }
 
