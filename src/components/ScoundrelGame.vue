@@ -378,9 +378,18 @@ const handleDebugClick = () => {
             label="Flee this room"
             type="button"
             severity="help"
-            outlined
+            :outlined="!canFlee"
             :disabled="!canFlee"
             @click="fleeRoom"
+          />
+        </div>
+        <div class="start-floating">
+          <Button
+            :label="state.status === 'playing' ? 'Restart Run' : 'Start New Run'"
+            type="button"
+            severity="warn"
+            :outlined="state.status === 'playing'"
+            @click="startRun"
           />
         </div>
         <div class="board">
@@ -462,13 +471,8 @@ const handleDebugClick = () => {
           <p class="value">{{ roomLabel }}</p>
         </div>
         <div class="hud-block restart-block">
-          <Button
-            :label="state.status === 'playing' ? 'Restart Run' : 'Start New Run'"
-            type="button"
-            severity="warn"
-            @click="startRun"
-          />
-          <span class="turn">Turn {{ state.turn }}</span>
+          <p class="label">Turn</p>
+          <p class="value">{{ state.turn }}</p>
         </div>
       </div>
     </footer>
@@ -553,11 +557,6 @@ const handleDebugClick = () => {
   margin: 0;
   font-size: 0.85rem;
   color: rgba(228, 228, 231, 0.72);
-}
-
-.turn {
-  font-weight: 600;
-  color: rgba(228, 228, 231, 0.9);
 }
 
 .status {
@@ -730,6 +729,13 @@ const handleDebugClick = () => {
   position: absolute;
   top: -3.5rem;
   left: 1rem;
+  z-index: 4;
+}
+
+.start-floating {
+  position: absolute;
+  top: -3.5rem;
+  right: 1rem;
   z-index: 4;
 }
 
