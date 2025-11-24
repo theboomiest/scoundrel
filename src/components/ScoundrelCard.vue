@@ -65,7 +65,7 @@ const handleClick = () => {
 </template>
 
 <style scoped>
-.card {
+.card.card {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -73,7 +73,7 @@ const handleClick = () => {
   height: 100%;
   min-height: 0;
   text-align: left;
-  border: 1px solid rgba(255, 214, 165, 0.65);
+  border: 4px solid var(--border-color);
   background:
     linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(236, 233, 226, 0.95)),
     radial-gradient(circle at 18% 18%, rgba(148, 139, 122, 0.3), transparent 40%),
@@ -86,30 +86,47 @@ const handleClick = () => {
     border-color 140ms ease,
     box-shadow 140ms ease;
   cursor: pointer;
+  box-shadow: 0 6px 12px var(--shadow-color);
+  box-sizing: border-box;
 }
 
-.card:disabled {
+.card.card,
+.card.card:hover:not(:disabled),
+.card.card:active:not(:disabled),
+.card.card:focus-visible,
+.card.card[data-active='true'] {
+  border-width: 8px !important;
+  border-style: solid !important;
+}
+
+.card.card:focus-visible {
+  outline: none;
+}
+
+.card.card:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.card:hover:not(:disabled) {
-  transform: translateY(-2px);
-  border-color: rgba(255, 214, 165, 0.9);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+.card.card:hover:not(:disabled) {
+  transform: translateY(-8px);
+  border: 4px;
+  border-color: var(--border-hover);
+  box-shadow: 0 12px 20px var(--shadow-color);
   background:
     linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(236, 233, 226, 0.95)),
     radial-gradient(circle at 18% 18%, rgba(148, 139, 122, 0.3), transparent 40%),
     radial-gradient(circle at 80% 10%, rgba(255, 214, 165, 0.22), transparent 40%) !important;
 }
 
-.card[data-active='true'] {
-  border-color: rgba(251, 191, 36, 0.6);
-  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.25);
+.card.card[data-active='true'] {
+  border-color: var(--border-hover);
+  box-shadow: 0 8px 20px hsla(0, 0%, 81%, 0.6);
+  transform: translateY(-4px);
 }
 
-.card:active:not(:disabled) {
-  transform: translateY(0);
+.card.card:active:not(:disabled) {
+  transform: translateY(-4px);
 }
 
 .card__label {
@@ -148,6 +165,27 @@ const handleClick = () => {
   background-color: #0f2f23;
   color: #bbf7d0;
   border: 1px solid rgba(52, 211, 153, 0.35);
+}
+
+.card[data-kind='monster'] {
+  --border-color: #4d1010;
+  --border-hover: #4d1010;
+  --shadow-color: rgba(254, 205, 211, 0.28);
+  --shadow-strong: rgba(254, 205, 211, 0.52);
+}
+
+.card[data-kind='weapon'] {
+  --border-color: #4e3f07;
+  --border-hover: #4e3f07;
+  --shadow-color: rgba(254, 249, 195, 0.28);
+  --shadow-strong: rgba(254, 249, 195, 0.52);
+}
+
+.card[data-kind='potion'] {
+  --border-color: #094926;
+  --border-hover: #094926;
+  --shadow-color: rgba(187, 247, 208, 0.28);
+  --shadow-strong: rgba(187, 247, 208, 0.52);
 }
 
 .name {
@@ -200,5 +238,6 @@ const handleClick = () => {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
+  color: #111827;
 }
 </style>
