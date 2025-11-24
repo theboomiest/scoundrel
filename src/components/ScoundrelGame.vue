@@ -148,10 +148,9 @@ const contextActions = computed(() => {
   if (card.type === 'potion') {
     actions.push({
       key: 'drink-potion',
-      label: state.potionUsedThisRoom ? 'Potion already used' : 'Drink potion',
-      severity: 'success',
-      outlined: state.potionUsedThisRoom,
-      disabled: state.potionUsedThisRoom,
+      label: state.potionUsedThisRoom ? 'Drink potion (wasted)' : 'Drink potion',
+      severity: state.potionUsedThisRoom ? 'secondary' : 'success',
+      disabled: false,
       onClick: drinkPotion,
     })
   }
