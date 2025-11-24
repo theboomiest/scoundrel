@@ -31,7 +31,7 @@ body {
       transparent 14vh,
       transparent 100%
     ),
-    linear-gradient(180deg, hsl(20, 20%, 14%), hsl(10, 16%, 4%));
+    linear-gradient(180deg, var(--wall-start, #2c231c), var(--wall-end, #181210));
   color: hsl(20, 2, 99);
   font-family: 'Noto Sans', 'EB Garamond', 'Cormorant Garamond', 'Times New Roman', serif;
   letter-spacing: 0.02em;
