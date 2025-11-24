@@ -69,6 +69,7 @@ const state = reactive({
   deck: [],
   discard: [],
   health: maxHealth,
+  healthLocked: false,
   status: 'ready', // ready | playing | won | lost
   message: 'Start a new run to enter the dungeon.',
   turn: 1,
@@ -165,6 +166,7 @@ const startRun = () => {
   state.board = Array(4).fill(null)
   state.discard = []
   state.health = maxHealth
+  state.healthLocked = false
   state.status = 'playing'
   state.turn = 1
   state.message = 'Four cards await. Pick wisely.'
@@ -190,8 +192,11 @@ const fightUnarmed = () => {
   if (!state.selectedCard || state.selectedCard.type !== 'monster') return
   const card = state.selectedCard
   const damage = card.value
-  state.health -= damage
-  state.message = `${formatCardLabel(card)} hits for ${damage}.`
+  const damageTaken = state.healthLocked ? 0 : damage
+  state.health -= damageTaken
+  state.message = state.healthLocked
+    ? `${formatCardLabel(card)} hits, but health is locked.`
+    : `${formatCardLabel(card)} hits for ${damageTaken}.`
   state.roomInteracted = true
   resolveCard(card)
 }
@@ -203,13 +208,18 @@ const fightWithWeapon = () => {
 
   const blockedAmount = Math.min(card.value, state.weapon.value)
   const damage = card.value - blockedAmount
+  const damageTaken = state.healthLocked ? 0 : damage
   state.lastWeaponUseValue = card.value
   state.weaponUses.push(card.rank)
-  state.health -= damage
+  state.health -= damageTaken
   state.message =
     damage === 0
-      ? `${formatCardLabel(card)} is fully blocked by ${formatCardLabel(state.weapon)}.`
-      : `${formatCardLabel(card)} hits for ${damage} (blocked ${blockedAmount}).`
+      ? `${formatCardLabel(card)} is fully blocked by ${formatCardLabel(state.weapon)}${
+          state.healthLocked ? ' (health locked).' : '.'
+        }`
+      : `${formatCardLabel(card)} hits for ${damageTaken} (blocked ${blockedAmount})${
+          state.healthLocked ? '; health locked.' : '.'
+        }`
   state.roomInteracted = true
   resolveCard(card)
 }
@@ -241,7 +251,10 @@ watch(
 const drinkPotion = () => {
   if (!state.selectedCard || state.selectedCard.type !== 'potion') return
   const card = state.selectedCard
-  if (!state.potionUsedThisRoom) {
+  if (state.healthLocked) {
+    state.potionUsedThisRoom = true
+    state.message = `${formatCardLabel(card)} is wasted; health is locked.`
+  } else if (!state.potionUsedThisRoom) {
     state.health = Math.min(maxHealth, state.health + card.value)
     state.potionUsedThisRoom = true
     state.message = `You recover ${card.value} health.`
@@ -333,12 +346,9 @@ const fleeRoom = () => {
   drawNewRoom(4)
 }
 
-const restoreFullHealth = () => {
-  state.health = maxHealth
-  if (state.status === 'lost') {
-    state.status = 'playing'
-  }
-  state.message = 'Health restored (debug).'
+const toggleHealthLock = () => {
+  state.healthLocked = !state.healthLocked
+  state.message = state.healthLocked ? 'Health locked (debug).' : 'Health unlocked.'
 }
 
 const toggleDebug = () => {
@@ -474,11 +484,11 @@ const handleDebugClick = () => {
           <p><strong>Deck (top to bottom)</strong></p>
           <div class="debug-actions">
             <Button
-              label="Restore full health (debug)"
+              :label="state.healthLocked ? 'Unlock health' : 'Lock health'"
               type="button"
-              severity="secondary"
+              :severity="state.healthLocked ? 'danger' : 'success'"
               outlined
-              @click.stop="restoreFullHealth"
+              @click.stop="toggleHealthLock"
             />
             <Button
               :label="debugCollapsed ? 'Open debug' : 'Stow debug'"
