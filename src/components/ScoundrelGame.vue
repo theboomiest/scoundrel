@@ -76,6 +76,7 @@ const state = reactive({
   potionUsedThisRoom: false,
   weapon: null,
   lastWeaponUseValue: null,
+  weaponUses: [],
   selectedCard: null,
   roomInteracted: false,
   previousRoomFled: false,
@@ -88,6 +89,9 @@ const weaponLabel = computed(() => {
   if (!state.weapon) return 'None'
   return `${state.weapon.rank} of ${formatSuit(state.weapon.suit)}`
 })
+const weaponUseLog = computed(() =>
+  state.weaponUses.length ? state.weaponUses.join(' \u2192 ') : 'None',
+)
 
 const statusLabel = computed(() => {
   if (state.status === 'won') return 'Victory! You cleared the dungeon!'
@@ -167,6 +171,7 @@ const startRun = () => {
   state.potionUsedThisRoom = false
   state.weapon = null
   state.lastWeaponUseValue = null
+  state.weaponUses = []
   state.selectedCard = null
   state.roomInteracted = false
   state.previousRoomFled = false
@@ -198,6 +203,7 @@ const fightWithWeapon = () => {
   const blockedAmount = Math.min(card.value, state.weapon.value)
   const damage = card.value - blockedAmount
   state.lastWeaponUseValue = card.value
+  state.weaponUses.push(card.rank)
   state.health -= damage
   state.message =
     damage === 0
@@ -212,6 +218,7 @@ const equipWeapon = () => {
   const card = state.selectedCard
   state.weapon = card
   state.lastWeaponUseValue = null
+  state.weaponUses = []
   state.message = `Equipped ${formatCardLabel(card)}. Use on descending monster strengths.`
   state.roomInteracted = true
   resolveCard(card)
@@ -416,7 +423,7 @@ const handleDebugClick = () => {
         <div class="hud-block">
           <p class="label">Weapon</p>
           <p class="value">{{ weaponLabel }}</p>
-          <!-- <p class="hint">{{ weaponRuleLabel }}</p> -->
+          <p class="hint">{{ weaponUseLog }}</p>
         </div>
         <div class="hud-block">
           <p class="label">Deck</p>
@@ -516,6 +523,12 @@ const handleDebugClick = () => {
 
 .value[data-warn='true'] {
   color: #fca5a5;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(228, 228, 231, 0.72);
 }
 
 .turn {
