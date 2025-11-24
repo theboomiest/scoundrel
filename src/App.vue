@@ -105,6 +105,11 @@ onBeforeUnmount(() => {
               </p>
             </div>
           </div>
+          <div class="credit-div">
+            <a class="credit-text" href="http://stfj.net/art/2011/Scoundrel.pdf" target="_blank"
+              >Based on a card game created by Zach Gage and Kurt Bieg</a
+            >
+          </div>
         </div>
       </div>
       <Button
@@ -173,6 +178,20 @@ onBeforeUnmount(() => {
   font-size: 0.9rem;
   margin-bottom: -0.5rem;
   opacity: 0.7;
+}
+
+.credit-div {
+  color: gainsboro;
+  display: flex;
+  justify-content: flex-end;
+  text-align: right;
+  width: 100%;
+}
+
+.credit-text {
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: hsl(0, 0%, 64%);
 }
 
 h1 {
