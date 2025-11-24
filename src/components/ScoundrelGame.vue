@@ -1,8 +1,8 @@
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import ScoundrelCard from './ScoundrelCard.vue'
 
-const emit = defineEmits(['run-started'])
+const emit = defineEmits(['run-started', 'deck-updated'])
 
 const maxHealth = 20
 const isDev = import.meta.env.DEV
@@ -77,6 +77,7 @@ const state = reactive({
   weapon: null,
   lastWeaponUseValue: null,
   weaponUses: [],
+  initialDeckSize: 0,
   selectedCard: null,
   roomInteracted: false,
   previousRoomFled: false,
@@ -160,6 +161,7 @@ const contextActions = computed(() => {
 
 const startRun = () => {
   state.deck = createDeck()
+  state.initialDeckSize = state.deck.length
   state.board = Array(4).fill(null)
   state.discard = []
   state.health = maxHealth
@@ -222,6 +224,19 @@ const equipWeapon = () => {
   state.roomInteracted = true
   resolveCard(card)
 }
+
+const emitDeckUpdate = (remaining = state.deck.length) => {
+  const total = state.initialDeckSize || remaining
+  emit('deck-updated', { remaining, total })
+}
+
+watch(
+  () => state.deck.length,
+  (len) => {
+    emitDeckUpdate(len)
+  },
+  { immediate: true },
+)
 
 const drinkPotion = () => {
   if (!state.selectedCard || state.selectedCard.type !== 'potion') return

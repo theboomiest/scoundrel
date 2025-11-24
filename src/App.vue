@@ -1,8 +1,16 @@
 <script setup>
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import ScoundrelGame from './components/ScoundrelGame.vue'
 
 const heroCollapsed = ref(false)
+const wallProgress = ref(0)
+
+const wallPalette = {
+  startTop: '#6b7c8f',
+  startBottom: '#4b5666',
+  endTop: '#7f1d1d',
+  endBottom: '#0b0b0c',
+}
 
 const handleRunStarted = () => {
   heroCollapsed.value = true
@@ -17,6 +25,52 @@ const handleHeroClick = () => {
     heroCollapsed.value = false
   }
 }
+
+const lerp = (a, b, t) => Math.round(a + (b - a) * t)
+
+const hexToRgb = (hex) => {
+  const normalized = hex.replace('#', '')
+  const int = parseInt(normalized, 16)
+  return {
+    r: (int >> 16) & 255,
+    g: (int >> 8) & 255,
+    b: int & 255,
+  }
+}
+
+const rgbToHex = (r, g, b) =>
+  `#${[r, g, b]
+    .map((v) => v.toString(16).padStart(2, '0'))
+    .join('')}`
+
+const mixColor = (from, to, t) => {
+  const a = hexToRgb(from)
+  const b = hexToRgb(to)
+  return rgbToHex(lerp(a.r, b.r, t), lerp(a.g, b.g, t), lerp(a.b, b.b, t))
+}
+
+const applyWallColors = (progress = wallProgress.value) => {
+  const t = Math.max(0, Math.min(1, progress))
+  const start = mixColor(wallPalette.startTop, wallPalette.endTop, t)
+  const end = mixColor(wallPalette.startBottom, wallPalette.endBottom, t)
+  document.body.style.setProperty('--wall-start', start)
+  document.body.style.setProperty('--wall-end', end)
+}
+
+const handleDeckUpdated = ({ remaining, total }) => {
+  const ratio = total > 0 ? 1 - Math.max(0, Math.min(1, remaining / total)) : 0
+  wallProgress.value = ratio
+  applyWallColors(ratio)
+}
+
+onMounted(() => {
+  applyWallColors(0)
+})
+
+onBeforeUnmount(() => {
+  document.body.style.removeProperty('--wall-start')
+  document.body.style.removeProperty('--wall-end')
+})
 </script>
 
 <template>
@@ -67,7 +121,7 @@ const handleHeroClick = () => {
       <!-- <img alt="Scoundrel hero" class="hero__badge" :src="logo" width="96" height="96" /> -->
     </header>
 
-    <ScoundrelGame @run-started="handleRunStarted" />
+    <ScoundrelGame @run-started="handleRunStarted" @deck-updated="handleDeckUpdated" />
   </main>
 </template>
 
