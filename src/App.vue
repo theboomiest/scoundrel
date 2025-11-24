@@ -6,8 +6,8 @@ const heroCollapsed = ref(false)
 const wallProgress = ref(0)
 
 const wallPalette = {
-  startTop: '#575e66',
-  startBottom: '#3d4247',
+  startTop: '#52483b',
+  startBottom: '#3d362c',
   endTop: '#2e1e1f',
   endBottom: '#120b0c',
 }
